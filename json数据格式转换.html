@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+        }
+        body,html{
+            width: 100%;
+            height: 100%;
+            background-color: rgba(249,246,252,1);
+        }
+        .json{
+            padding: 50px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+<pre  class="json">22</pre>
+<script>
+    function GetRequest() {
+        var url = location.search;
+        var theRequest = new Object();
+        if (url.indexOf("?") != -1) {
+            var str = url.substr(1);
+            var strs = str.split("&");
+            for (var i = 0; i < strs.length; i++) {
+                theRequest[strs[i].split("=")[0]] = unescape(strs[i].split("=")[1]);
+            }
+        }
+        return theRequest;
+    }
+    function repeat(s, count) {
+        return new Array(count + 1).join(s);
+    }
+    function formatJson(a,b) {
+        var json =  a;
+        var i  = 0,
+            len = 0,
+            tab = "    ",
+            targetJson = "",
+            indentLevel = 0,
+            inString = false,
+            currentChar = null;
+        for (i = 0, len = json.length; i < len; i += 1) {
+            currentChar = json.charAt(i);
+
+            switch (currentChar) {
+                case '{':
+                case '[':
+                    if (!inString) {
+                        targetJson += currentChar + "\n" + repeat(tab, indentLevel + 1);
+                        indentLevel += 1;
+                    } else {
+                        targetJson += currentChar;
+                    }
+                    break;
+                case '}':
+                case ']':
+                    if (!inString) {
+                        indentLevel -= 1;
+                        targetJson += "\n" + repeat(tab, indentLevel) + currentChar;
+                    } else {
+                        targetJson += currentChar;
+                    }
+                    break;
+                case ',':
+                    if (!inString) {
+                        targetJson += ",\n" + repeat(tab, indentLevel);
+                    } else {
+                        targetJson += currentChar;
+                    }
+                    break;
+                case ':':
+                    if (!inString) {
+                        targetJson += ": ";
+                    } else {
+                        targetJson += currentChar;
+                    }
+                    break;
+                case ' ':
+                case "\n":
+                case "\t":
+                    if (inString) {
+                        targetJson += currentChar;
+                    }
+                    break;
+                case '"':
+                    if (i > 0 && json.charAt(i - 1) !== '\\') {
+                        inString = !inString;
+                    }
+                    targetJson += currentChar;
+                    break;
+                default:
+                    targetJson += currentChar;
+                    break;
+            }
+        }
+        document.querySelector(b).innerHTML = targetJson;
+        return;
+    }
+    if (GetRequest().flag){
+        if (GetRequest().flag == 'origin'){
+            formatJson(localStorage.getItem('originReport'),'.json');
+        }else if (GetRequest().flag == 'parser'){
+            formatJson(localStorage.getItem('parserReport'),'.json');
+        }
+    }
+</script>
+</body>
+</html>
